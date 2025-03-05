@@ -1,15 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import * as Firebird from 'node-firebird';
+import { firebirdConfig } from '../database.config';
 
 @Injectable()
 export class FirebirdDatabaseService {
-  private options = {
-    host: process.env.FIREBIRD_DISTRI_PPAL_HOST,
-    port: process.env.FIREBIRD_DISTRI_PPAL_PORT ? parseInt(process.env.FIREBIRD_DISTRI_PPAL_PORT, 10) : 3050,
-    database: process.env.FIREBIRD_DISTRI_PPAL_DATABASE,
-    user: process.env.FIREBIRD_DISTRI_PPAL_USER,
-    password: process.env.FIREBIRD_DISTRI_PPAL_PASSWORD,
-  };
+  private options = firebirdConfig;
 
   query(sql: string, params: any[] = []): Promise<any[]> {
     return new Promise((resolve, reject) => {
