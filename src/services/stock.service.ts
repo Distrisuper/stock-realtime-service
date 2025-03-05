@@ -146,18 +146,6 @@ export class StockService {
   }
 
   /**
-   * Retrieves the stock records for multiple articles.
-   *
-   * @param articleIdentifiers - An array of article identifiers (articleId or articleCode).
-   * @returns An array of stock records as plain objects.
-   */
-    async getStockByArticles(articleIdentifiers: string[]): Promise<any[]> {
-      const stockRecords = [];
-   
-      return stockRecords;
-    }
-
-  /**
    * Retrieves the stock record(s) for one or more articles.
    *
    * @param articleIdParam - The unique identifier(s) of the article(s).
