@@ -10,7 +10,7 @@ import { StockService } from './services/stock.service';
 @Module({
   imports: [
     CacheModule.register({
-      ttl: 60,
+      ttl: Number(process.env.CACHE_TTL_GLOBAL) || 0,
       max: 100
     }),
     ConfigModule.forRoot({

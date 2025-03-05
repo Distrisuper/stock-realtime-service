@@ -48,7 +48,8 @@ describe('StockService', () => {
 
       const result = await service.getAllStock();
       expect(Stock.findAll).toHaveBeenCalled();
-      expect(cacheManager.set).toHaveBeenCalledWith('allStock', [{ article_code: '04768', stock_mdp: 4 }], 60);
+      const cacheTTL = Number(process.env.CACHE_TTL_GLOBAL) || 0;
+      expect(cacheManager.set).toHaveBeenCalledWith('allStock', [{ article_code: '04768', stock_mdp: 4 }], cacheTTL);
       expect(result).toEqual([{ article_code: '04768', stock_mdp: 4 }]);
     });
   });

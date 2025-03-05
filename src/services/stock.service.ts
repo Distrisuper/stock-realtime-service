@@ -178,7 +178,7 @@ export class StockService {
   
     const stocks = await Stock.findAll();
     const plainStocks = stocks.map(stock => stock.toJSON());
-    await this.cacheManager.set(cacheKey, plainStocks, 60);
+    await this.cacheManager.set(cacheKey, plainStocks, Number(process.env.CACHE_TTL_GLOBAL) || 0);
 
     return plainStocks;
   }
