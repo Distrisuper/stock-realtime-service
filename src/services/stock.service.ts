@@ -71,7 +71,6 @@ export class StockService {
    * @returns {Promise<void>}
    *
    */
-  @EventPattern('reserve_stock')
   async handleReserveStock(data: StockEventPayload): Promise<void> {
     let articleIdentifier: string | null = null;
     if (data.articleCode) {
@@ -113,7 +112,6 @@ export class StockService {
    * @returns {Promise<void>}
    *
    */
-  @EventPattern('release_stock')
   async handleReleaseStock(data: StockEventPayload): Promise<void> {
     let articleIdentifier: string | null = null;
     if (data.articleCode) {
