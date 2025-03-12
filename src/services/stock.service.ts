@@ -4,6 +4,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { EventPattern } from '@nestjs/microservices';
 import { FirebirdDatabaseService } from '../database/firebird.service';
 import { Stock } from '../models/stock.model';
+import { InjectModel } from '@nestjs/sequelize';
 
 interface StockEventPayload {
   articleId?: string;
@@ -17,8 +18,11 @@ interface StockEventPayload {
 export class StockService {
   private articleCodeMap: Record<string, string> = {};
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private readonly fdbService: FirebirdDatabaseService) {
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly fdbService: FirebirdDatabaseService,
+    @InjectModel(Stock) private stockModel: typeof Stock
+  ) {
   }
 
   async loadArticleMappings() {
@@ -91,7 +95,7 @@ export class StockService {
       console.log(`Invalid warehouse provided: ${data.warehouse}`);
       return;
     }
-    const stockRecord = await Stock.findOne({ where: { article_code: articleIdentifier } });
+    const stockRecord = await this.stockModel.findOne({ where: { article_code: articleIdentifier } });
     if (!stockRecord) {
       console.log(`Stock record for article ${articleIdentifier} not found`);
       return;
@@ -132,7 +136,7 @@ export class StockService {
       console.log(`Invalid warehouse provided: ${data.warehouse}`);
       return;
     }
-    const stockRecord = await Stock.findOne({ where: { article_code: articleIdentifier } });
+    const stockRecord = await this.stockModel.findOne({ where: { article_code: articleIdentifier } });
     if (!stockRecord) {
       console.log(`Stock record for article ${articleIdentifier} not found`);
       return;
@@ -161,10 +165,11 @@ export class StockService {
         articleIds.push(articleId);
       } else {
         console.log(`Article code ${code} not found`);
+        return;
       }
     }
 
-    const stockRecords = await Stock.findAll({ where: { article_code: articleIds } });
+    const stockRecords = await this.stockModel.findAll({ where: { article_code: articleIds } });
 
     return stockRecords.map(record => record.toJSON());
   }
@@ -176,7 +181,7 @@ export class StockService {
       return cached;
     }
   
-    const stocks = await Stock.findAll();
+    const stocks = await this.stockModel.findAll();
     const plainStocks = stocks.map(stock => stock.toJSON());
     await this.cacheManager.set(cacheKey, plainStocks, Number(process.env.CACHE_TTL_GLOBAL) || 0);
 

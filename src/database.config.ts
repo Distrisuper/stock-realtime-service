@@ -1,5 +1,7 @@
 import { SequelizeModuleOptions } from '@nestjs/sequelize';
 import { Stock } from './models/stock.model';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 export const mysqlConfig: SequelizeModuleOptions = {
   dialect: 'mysql',
