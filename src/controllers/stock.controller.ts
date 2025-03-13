@@ -119,8 +119,8 @@ export class StockHttpController {
   async getStockByArticle(@Query('articleId') articleId: string, @Query('articleCode') articleCode: string) {
     const articleIds = articleId ? articleId.split(',').map(id => id.trim()) : [];
     const articleCodes = articleCode ? articleCode.split(',').map(code => code.trim()) : [];
-    const stock = await this.stockService.getStockByArticle(articleIds, articleCodes);
-    return { data: stock };
+    const stockResult = await this.stockService.getStockByArticle(articleIds, articleCodes);
+    return stockResult;
   }
 
   @Get('all')

@@ -158,20 +158,26 @@ export class StockService {
   async getStockByArticle(articleIdParam: string | string[], articleCodeParam: string | string[]) {
     const articleIds = Array.isArray(articleIdParam) ? articleIdParam : [articleIdParam];
     const articleCodes = Array.isArray(articleCodeParam) ? articleCodeParam : [articleCodeParam];
-
+    const errors: { source?: string, title: string; detail: string }[] = [];
     for (const code of articleCodes) {
       const articleId = await this.getArticleId(code);
       if (articleId) {
         articleIds.push(articleId);
       } else {
         console.log(`Article code ${code} not found`);
-        return;
+        errors.push({title: 'Article code not found', detail: `Article code ${code} not found`});
       }
     }
 
-    const stockRecords = await this.stockModel.findAll({ where: { article_code: articleIds } });
+    let stockRecords: Stock[] = [];
+    if (articleIds.length > 0) {
+      stockRecords = await this.stockModel.findAll({ where: { article_code: articleIds } });
+    }
 
-    return stockRecords.map(record => record.toJSON());
+    return {
+      data: stockRecords.map(record => record.toJSON()),
+      errors: errors.length > 0 ? errors : undefined
+    };
   }
 
   async getAllStock() {
