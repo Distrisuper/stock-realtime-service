@@ -27,22 +27,48 @@ export class StockHttpController {
         warehouse: { type: 'string', enum: ['MDP', 'ROS', 'BA', 'GP'], description: 'La sucursal donde se reserva el stock' },
         pending: { type: 'boolean', description: 'Si el stock está pendiente' },
       },
+      required: ['quantity', 'warehouse']
     },
   })
   @ApiResponse({
     status: 200,
-    description: 'Stock reservado',
+    description: 'Respuesta de reserva de stock (éxito o error)',
     schema: {
       type: 'object',
       properties: {
         data: {
           type: 'object',
+          nullable: true,
           properties: {
-            message: { type: 'string', example: 'Stock reservado' },
-          },
+            id: { type: 'string', example: '12345' },
+            type: { type: 'string', example: 'stock' },
+            attributes: {
+              type: 'object',
+              properties: {
+                article_code: { type: 'string', example: 'FRI1234' },
+                stock_mdp: { type: 'number', example: 10 },
+                reserved_quantity: { type: 'number', example: 5 },
+                warehouse: { type: 'string', example: 'MDP' },
+                pending: { type: 'boolean', example: false },
+                updated_at: { type: 'string', format: 'date-time', example: '2025-03-12T15:23:56.123Z' }
+              }
+            }
+          }
         },
-      },
-    },
+        errors: {
+          type: 'array',
+          nullable: true,
+          items: {
+            type: 'object',
+            properties: {
+              source: { type: 'string', example: 'articleCode' },
+              title: { type: 'string', example: 'Article code not found' },
+              detail: { type: 'string', example: 'Article code FRI1234 not found' }
+            }
+          }
+        }
+      }
+    }
   })
   async reserveStock(@Body() data: StockEventPayload) {
     const stockResult = await this.stockService.handleReserveStock(data);
@@ -56,27 +82,53 @@ export class StockHttpController {
       type: 'object',
       properties: {
         articleId: { type: 'string', description: 'El identificador único del artículo (también conocido como CODIGOARTICULO)' },
-        articleCode: { type: 'string', description: 'El código visible del artículo  (también conocido como CODIGOPARTICULAR)' },
+        articleCode: { type: 'string', description: 'El código visible del artículo (también conocido como CODIGOPARTICULAR)' },
         quantity: { type: 'number', description: 'La cantidad de stock a liberar (positivo)' },
         warehouse: { type: 'string', enum: ['MDP', 'ROS', 'BA', 'GP'], description: 'La sucursal donde se libera el stock' },
         pending: { type: 'boolean', description: 'Si el stock está pendiente' },
       },
+      required: ['quantity', 'warehouse']
     },
   })
   @ApiResponse({
     status: 200,
-    description: 'Stock liberado',
+    description: 'Respuesta de liberación de stock (éxito o error)',
     schema: {
       type: 'object',
       properties: {
         data: {
           type: 'object',
+          nullable: true,
           properties: {
-            message: { type: 'string', example: 'Stock liberado' },
-          },
+            id: { type: 'string', example: '12345' },
+            type: { type: 'string', example: 'stock' },
+            attributes: {
+              type: 'object',
+              properties: {
+                article_code: { type: 'string', example: 'FRI1234' },
+                stock_mdp: { type: 'number', example: 5 },
+                released_quantity: { type: 'number', example: 5 },
+                warehouse: { type: 'string', example: 'MDP' },
+                pending: { type: 'boolean', example: false },
+                updated_at: { type: 'string', format: 'date-time', example: '2025-03-12T15:23:56.123Z' }
+              }
+            }
+          }
         },
-      },
-    },
+        errors: {
+          type: 'array',
+          nullable: true,
+          items: {
+            type: 'object',
+            properties: {
+              source: { type: 'string', example: 'articleCode' },
+              title: { type: 'string', example: 'Article code not found' },
+              detail: { type: 'string', example: 'Article code FRI1234 not found' }
+            }
+          }
+        }
+      }
+    }
   })
   async releaseStock(@Body() data: StockEventPayload) {
     const stockResult = await this.stockService.handleReleaseStock(data);
