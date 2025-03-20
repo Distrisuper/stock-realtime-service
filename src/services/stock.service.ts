@@ -72,38 +72,50 @@ export class StockService {
    * will be converted to articleId).
    *
    * @param data - Reservation payload.
-   * @returns {Promise<void>}
+   * @returns {Promise<{ data?: any; errors?: { source?: string; title: string; detail: string }[] }>}
    *
    */
-  async handleReserveStock(data: StockEventPayload): Promise<void> {
+  async handleReserveStock(data: StockEventPayload): Promise<{ data?: any; errors?: { source?: string; title: string; detail: string }[] }> {
     let articleIdentifier: string | null = null;
+    const errors: { source?: string, title: string; detail: string }[] = [];
     if (data.articleCode) {
       articleIdentifier = await this.getArticleId(data.articleCode);
       if (!articleIdentifier) {
-        console.log(`Article code ${data.articleCode} not found`);
-        return;
+        errors.push({title: 'Article code not found', detail: `Article code ${data.articleCode} not found`});
+        return { errors };
       }
     } else if (data.articleId) {
       articleIdentifier = data.articleId;
     } else {
-      console.log(`No article identifier provided`);
-      return;
+      return { errors: [{ title: 'Missing article identifier', detail: 'Either articleId or articleCode must be provided' }] };
     }
 
     const fieldName = this.resolveFieldName(data.warehouse, data.pending);
     if (!fieldName) {
-      console.log(`Invalid warehouse provided: ${data.warehouse}`);
-      return;
+      return { errors: [{ title: 'Invalid warehouse', detail: `Warehouse ${data.warehouse} is not valid` }] };
     }
     const stockRecord = await this.stockModel.findOne({ where: { article_code: articleIdentifier } });
     if (!stockRecord) {
-      console.log(`Stock record for article ${articleIdentifier} not found`);
-      return;
+      return { errors: [{ title: 'Stock record not found', detail: `Stock record for article ${articleIdentifier} not found` }] };
     }
     const currentValue = (stockRecord as any)[fieldName] || 0;
     const newValue = currentValue + data.quantity;
     await stockRecord.update({ [fieldName]: newValue, date_updated: new Date() });
-    console.log(`Stock reserved: ${data.quantity} for article ${articleIdentifier} (${fieldName})`);
+
+    return {
+      data: {
+        id: articleIdentifier,
+        type: 'stock',
+        attributes: {
+          article_code: articleIdentifier,
+          [fieldName]: newValue,
+          reserved_quantity: data.quantity,
+          warehouse: data.warehouse,
+          pending: data.pending || false,
+          updated_at: new Date()
+        }
+      }
+    };
   }
 
   /**
@@ -113,38 +125,50 @@ export class StockService {
    * It accepts either an articleId or an articleCode (which is converted to articleId).
    *
    * @param data - Release payload.
-   * @returns {Promise<void>}
+   * @returns {Promise<{ data?: any; errors?: { source?: string; title: string; detail: string }[] }>}
    *
    */
-  async handleReleaseStock(data: StockEventPayload): Promise<void> {
+  async handleReleaseStock(data: StockEventPayload): Promise<{ data?: any; errors?: { source?: string; title: string; detail: string }[] }> {
     let articleIdentifier: string | null = null;
+    const errors: { source?: string, title: string; detail: string }[] = [];
+
     if (data.articleCode) {
       articleIdentifier = await this.getArticleId(data.articleCode);
       if (!articleIdentifier) {
-        console.log(`Article code ${data.articleCode} not found`);
-        return;
+        errors.push({title: 'Article code not found', detail: `Article code ${data.articleCode} not found`});
+        return { errors };
       }
     } else if (data.articleId) {
       articleIdentifier = data.articleId;
     } else {
-      console.log(`No article identifier provided`);
-      return;
+      return { errors: [{ title: 'Missing article identifier', detail: 'Either articleId or articleCode must be provided' }] };
     }
 
     const fieldName = this.resolveFieldName(data.warehouse, data.pending);
     if (!fieldName) {
-      console.log(`Invalid warehouse provided: ${data.warehouse}`);
-      return;
+      return { errors: [{ title: 'Invalid warehouse', detail: `Warehouse ${data.warehouse} is not valid` }] };
     }
     const stockRecord = await this.stockModel.findOne({ where: { article_code: articleIdentifier } });
     if (!stockRecord) {
-      console.log(`Stock record for article ${articleIdentifier} not found`);
-      return;
+      return { errors: [{ title: 'Stock record not found', detail: `Stock record for article ${articleIdentifier} not found` }] };
     }
     const currentValue = (stockRecord as any)[fieldName] || 0;
     const newValue = Math.max(0, currentValue - data.quantity);
     await stockRecord.update({ [fieldName]: newValue, date_updated: new Date() });
-    console.log(`Stock released: ${data.quantity} for article ${articleIdentifier} (${fieldName})`);
+    return {
+      data: {
+        id: articleIdentifier,
+        type: 'stock',
+        attributes: {
+          article_code: articleIdentifier,
+          [fieldName]: newValue,
+          released_quantity: data.quantity,
+          warehouse: data.warehouse,
+          pending: data.pending || false,
+          updated_at: new Date()
+        }
+      }
+    };
   }
 
   /**

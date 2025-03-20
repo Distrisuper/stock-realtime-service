@@ -45,8 +45,8 @@ export class StockHttpController {
     },
   })
   async reserveStock(@Body() data: StockEventPayload) {
-    await this.stockService.handleReserveStock(data);
-    return { data: { message: 'Stock reservado' } };
+    const stockResult = await this.stockService.handleReserveStock(data);
+    return stockResult;
   }
 
   @Post('release')
@@ -79,8 +79,8 @@ export class StockHttpController {
     },
   })
   async releaseStock(@Body() data: StockEventPayload) {
-    await this.stockService.handleReleaseStock(data);
-    return { data: { message: 'Stock liberado' } };
+    const stockResult = await this.stockService.handleReleaseStock(data);
+    return stockResult;
   }
 
   @Get()
