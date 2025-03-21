@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { EventPattern } from '@nestjs/microservices';
 import { FirebirdDatabaseService } from '../database/firebird.service';
 import { Stock } from '../models/stock.model';
 import { InjectModel } from '@nestjs/sequelize';
